@@ -116,6 +116,13 @@ $join_kubernetes_cluster = <<SCRIPT
 SCRIPT
 
 
+
+$install_helm = <<SCRIPT
+curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > /tmp/get_helm.sh
+chmod 700 /tmp/get_helm.sh
+/tmp/get_helm.sh
+SCRIPT
+
 Vagrant.configure(2) do |config|
    VAGRANT_COMMAND = ARGV[0]
 #   if VAGRANT_COMMAND == "ssh"
@@ -125,7 +132,7 @@ Vagrant.configure(2) do |config|
   config.vm.box = base_box
   config.vm.box_version = base_box_version
   config.vm.synced_folder "tmp_deploying_stage/", "/tmp_deploying_stage",create:true
-  config.vm.synced_folder "src/", "/src",create:true
+  config.vm.synced_folder "examples/", "/examples",create:true
   boxes.each do |node|
     config.vm.define node['name'] do |config|
       config.vm.hostname = node['name']
@@ -162,7 +169,7 @@ Vagrant.configure(2) do |config|
       config.vm.network "private_network",
       ip: node['mgmt_ip'],:netmask => "255.255.255.0",
       virtualbox__intnet: false,
-      hostonlyadapter: ["vboxnet3"]
+      hostonlyadapter: ["vboxnet1"]
 
 
 
@@ -172,7 +179,7 @@ Vagrant.configure(2) do |config|
       #  :adapter => 2
 
 
-      config.vm.network "forwarded_port", guest: 8001, host: 8001, auto_correct: true
+      #config.vm.network "forwarded_port", guest: 8001, host: 8001, auto_correct: true
 
       config.vm.network "public_network",
       bridge: ["enp4s0","wlp3s0","enp3s0f1","wlp2s0","enp3s0"],
@@ -204,8 +211,8 @@ Vagrant.configure(2) do |config|
       config.vm.provision :shell, :inline => disable_swap
 
       config.vm.provision "shell", inline: <<-SHELL
-        sudo cp -R /src ~vagrant
-        sudo chown -R vagrant:vagrant ~vagrant/src
+        sudo cp -R /examples ~vagrant
+        sudo chown -R vagrant:vagrant ~vagrant/examples
       SHELL
  
         #config.vm.provision "shell", inline: "sudo sed -i 's/allowed_users=.*$/allowed_users=anybody/' /etc/X11/Xwrapper.config"
@@ -262,6 +269,11 @@ Vagrant.configure(2) do |config|
           s.name       = "Create Kubernetes Cluster"
           s.inline     = $create_kubernetes_cluster
           s.args       = master_ip
+        end
+
+        config.vm.provision "shell" do |s|
+          s.name       = "Install Helm"
+          s.inline     = $install_helm
         end
 
 	      # config.vm.provision "shell", inline: <<-SHELL
