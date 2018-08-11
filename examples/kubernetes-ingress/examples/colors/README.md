@@ -20,9 +20,10 @@ In this example we deploy the NGINX or NGINX Plus Ingress controller, a simple w
 ~~~
 	$ helm install --name codegazers .
 ~~~
-2. Save the public IP address of the Ingress controller into a shell variable:
+2. Save the public IP address and HTTP port of the Ingress controller into a shell variable:
 ~~~
-    $ IC_IP=XXX.YYY.ZZZ.III
+    $ export IC_IP=XXX.YYY.ZZZ.III
+    $ export IC_HTTP_PORT=KKKK
 ~~~ 
 
 ## 2. Deploy the Colors Application
