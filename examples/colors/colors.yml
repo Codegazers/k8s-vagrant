@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: blue
-        image: codegazers/colors:1.1
+        image: codegazers/colors:1.2
         env:
         - name: COLOR
           value: blue
@@ -50,7 +50,7 @@ spec:
     spec:
       containers:
       - name: red 
-        image: codegazers/colors:1.1
+        image: codegazers/colors:1.2
         env:
         - name: COLOR
           value: red
