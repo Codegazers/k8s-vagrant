@@ -17,4 +17,3 @@ spec:
         image: frjaraur/colors:1.0
         ports:
         - containerPort: 3000
-
