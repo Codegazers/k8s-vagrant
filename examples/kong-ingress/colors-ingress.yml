@@ -2,6 +2,9 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: colors-ingress
+#  namespace: kong
+  annotations:
+    rate-limiting.plugin.konghq.com: "add-ratelimiting-to-route"
 spec:
   rules:
   - host: blue.example.com
