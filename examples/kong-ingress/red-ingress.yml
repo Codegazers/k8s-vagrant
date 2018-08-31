@@ -1,0 +1,15 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: red-ingress
+#  namespace: kong
+  annotations:
+    rate-limiting.plugin.konghq.com: "add-ratelimiting-to-route"
+spec:
+  rules:
+  - host: red.example.com
+    http:
+      paths:
+      - backend:
+          serviceName: red-svc
+          servicePort: 80

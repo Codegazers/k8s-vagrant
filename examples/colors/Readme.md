@@ -1,6 +1,6 @@
 
 
-## Colors Example using frjaraur/colors:1.0
+## Colors Example using codegazers/colors:1.3
 
 
 
