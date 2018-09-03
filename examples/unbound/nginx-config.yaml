@@ -1,0 +1,16 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: nginx-config
+  namespace: nginx-ingress
+data:
+    stream-snippets: |
+      upstream unbound-udp {
+          server unbound-svc.default.svc.cluster.local:53;
+      }
+
+      server {
+          listen 5353 udp;
+          proxy_pass unbound-udp;
+          proxy_responses 1;
+      }

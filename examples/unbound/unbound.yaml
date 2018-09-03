@@ -1,0 +1,40 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: unbound
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: unbound
+  template:
+    metadata:
+      labels:
+        app: unbound
+    spec:
+      containers:
+      - name: unbound
+        image: frjaraur/docker-simple-unbound
+        env:
+        - name: DNSSERVERS
+          value: "8.8.8.8 8.8.4.4"
+        ports:
+        - containerPort: 53
+          name: dns
+          protocol: UDP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: unbound-svc
+spec:
+  type: NodePort
+  #clusterIP: None
+  selector:
+   app: unbound 
+  ports:
+  - name: dns
+    port: 53
+    targetPort: 53
+    protocol: UDP
+    nodePort: 32767
