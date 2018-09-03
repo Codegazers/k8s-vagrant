@@ -1,0 +1,19 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: colors-ingress-test
+  annotations:
+    #nginx.org/rewrites: "serviceName=red-svc rewrite=/blue/;"
+spec:
+  rules:
+  - host: red.example.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: red-svc
+          servicePort: 3000
+      - path: /text
+        backend:
+          serviceName: blue-svc
+          servicePort: 3000
