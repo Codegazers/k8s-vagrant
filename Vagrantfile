@@ -32,7 +32,7 @@ boxes_hostsfile_entries=""
 
 disable_swap = <<SCRIPT
     swapoff -a 
-    sed -i '/swap/ s/^\(.*\)$/#\1/g' /etc/fstab
+    sed -i '/swap/{ s|^|#| }' /etc/fstab
 SCRIPT
 
 update_hosts = <<SCRIPT
@@ -118,7 +118,7 @@ SCRIPT
 
 
 $install_helm = <<SCRIPT
-curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > /tmp/get_helm.sh
+curl -o /tmp/get_helm.sh -sL https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get
 chmod 700 /tmp/get_helm.sh
 /tmp/get_helm.sh
 SCRIPT
@@ -191,7 +191,6 @@ Vagrant.configure(2) do |config|
       #  systemctl reload ssh
       #SHELL
 
-
       config.vm.provision "shell", inline: <<-SHELL
         systemctl stop apt-daily.timer
         systemctl disable apt-daily.timer
@@ -209,6 +208,7 @@ Vagrant.configure(2) do |config|
       
       # Not really needed if we deploy without swap checking
       config.vm.provision :shell, :inline => disable_swap
+
 
       config.vm.provision "shell", inline: <<-SHELL
         sudo cp -R /examples ~vagrant
