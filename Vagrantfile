@@ -124,7 +124,7 @@ chmod 700 /tmp/get_helm.sh
 SCRIPT
 
 Vagrant.configure(2) do |config|
-   VAGRANT_COMMAND = ARGV[0]
+   #VAGRANT_COMMAND = ARGV[0]
 #   if VAGRANT_COMMAND == "ssh"
 #    config.ssh.username = 'ubuntu'
 #    config.ssh.password = 'ubuntu'
