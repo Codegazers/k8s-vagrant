@@ -3,7 +3,7 @@ kind: Ingress
 metadata:
   name: colors-ingress
   annotations:
-    nginx.com/sticky-cookie-services: "serviceName=red-svc srv_id expires=10s path=/text;"
+    nginx.com/sticky-cookie-services: "serviceName=red-svc red_svc_id expires=60s path=/;"
 spec:
   rules:
   - host: blue.example.com

@@ -20,7 +20,7 @@ curl https://raw.githubusercontent.com/Codegazers/k8s-vagrant/master/examples/co
 kubectl get all --namespace default
 ~~~
 
-### For quick access we prepare some envirnment variables
+### For quick access we prepare some environment variables
 ~~~
 
 
@@ -54,6 +54,8 @@ http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:blue.example.com
 ab -n 10000 -v 2 -k  -H "host: red.example.com" ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text
 ~~~
 
+-------
+
 ## Ingress Controller with HealthChecks
 
 ### We will deploy now application with active health checks
@@ -66,7 +68,7 @@ curl https://raw.githubusercontent.com/Codegazers/k8s-vagrant/master/examples/co
 
 ### And now we update ingress resource 
 ~~~
-kubectl delete ingress colors-ingress
+kubectl delete ingress colors-ingress # Or just update using apply
 
 curl https://raw.githubusercontent.com/Codegazers/k8s-vagrant/master/examples/colors/colors-ingress-with-health.yml | kubectl apply -f -
 ~~~
@@ -173,6 +175,7 @@ http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:blue.example.com
 http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:blue.example.com
 ~~~
 
+-------
 
 ## Ingress Controller rewriting 
 ### Update ingress resource 
@@ -185,11 +188,27 @@ curl https://raw.githubusercontent.com/Codegazers/k8s-vagrant/master/examples/co
 ~~~
 http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/red/text Host:blue.example.com
 ~~~
-Results will show a red application container
+Results will show a red application pod
 
+-------
 
+## Ingress Controller Sticky Sessions Persistence
+### Update ingress resource 
+~~~
+curl https://raw.githubusercontent.com/Codegazers/k8s-vagrant/master/examples/colors/colors-ingress-sticky.yml | kubectl apply -f -
+~~~
+### We can just test rewrite easily using /red/ path on blue deployment:
+~~~
+http --session red ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:red.example.com
 
-## Dashboard will be accesible on http://127.0.0.1:8080/dashboard.html after nginx-ingress pod port forwarding:
+http --session red ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:red.example.com
+
+~~~
+Results will show same red application pod everytime we use same session.
+
+-------
+
+### Dashboard will be accesible on http://127.0.0.1:8080/dashboard.html after nginx-ingress pod port forwarding:
 ~~~
 kubectl port-forward $(kubectl get pods -n nginx-ingress -o name) 8080:8080 --namespace=nginx-ingress
 ~~~
