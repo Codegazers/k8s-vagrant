@@ -3,7 +3,7 @@
 
 ### We deploy complete NGINX Plus Ingress Controller with a full deployment file
 ~~~
-https://raw.githubusercontent.com/Codegazers/k8s-vagrant/master/demo/nginx-plus-ingress_full-deployment.yml | kubectl apply -f -
+curl https://raw.githubusercontent.com/Codegazers/k8s-vagrant/master/demo/nginx-plus-ingress_full-deployment.yml | kubectl apply -f -
 ~~~
 
 ### We have created 'nginx-ingress' namespace so we will wait until all Kong components are ready.
@@ -58,8 +58,10 @@ ab -n 10000 -v 2 -k  -H "host: red.example.com" ${INGRESS_IP}:${INGRESS_HTTP_POR
 
 kubectl delete ingress colors-ingress
 
-curl https://raw.githubusercontent.com/Codegazers/k8s-vagrant/master/examples/colors/colors-ingress.yml | kubectl apply -f -
-
+curl https://raw.githubusercontent.com/Codegazers/k8s-vagrant/master/examples/colors/colors-ingress-with-health.yml | kubectl apply -f -
 
 ~~~
-
+### And now we update application deployments
+~~~
+curl https://raw.githubusercontent.com/Codegazers/k8s-vagrant/master/examples/colors/colors-with-health.yml | kubectl apply -f -
+~~~
