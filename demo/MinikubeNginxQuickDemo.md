@@ -67,6 +67,108 @@ kubectl delete ingress colors-ingress
 curl https://raw.githubusercontent.com/Codegazers/k8s-vagrant/master/examples/colors/colors-ingress-with-health.yml | kubectl apply -f -
 ~~~
 
+### Checking health for blue.example.com we notice that the 2 replicas are working fine (healthcheck at /health)
+~~~
+http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:blue.example.com
+~~~
+
+#### _Sample output_
+~~~
+${INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:blue.example.com
+HTTP/1.1 200 OK
+Connection: keep-alive
+Date: Thu, 06 Sep 2018 16:57:40 GMT
+Server: nginx/1.13.10
+Transfer-Encoding: chunked
+
+APP_VERSION: 1.0
+COLOR: blue
+CONTAINER_NAME: blue-app-66f8cc9cf9-zgwqv
+CONTAINER_IP: 172.17.0.7
+
+
+{INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:blue.example.com
+HTTP/1.1 200 OK
+Connection: keep-alive
+Date: Thu, 06 Sep 2018 16:57:41 GMT
+Server: nginx/1.13.10
+Transfer-Encoding: chunked
+
+APP_VERSION: 1.0
+COLOR: blue
+CONTAINER_NAME: blue-app-66f8cc9cf9-twhr5
+CONTAINER_IP: 172.17.0.8
+
+~~~
+
+### Now we set one of the application pods to a failure state
+~~~
+
+kubectl get pods 
+
+kubectl exec -ti <POD>  -- touch /tmp/down
+
+~~~
+
+#### _Sample output_
+~~~
+$ kubectl get pods 
+NAME                        READY     STATUS    RESTARTS   AGE
+blue-app-66f8cc9cf9-twhr5   1/1       Running   0          1m
+blue-app-66f8cc9cf9-zgwqv   1/1       Running   0          1m
+red-app-5969d9f7bd-dnwwz    1/1       Running   0          1m
+red-app-5969d9f7bd-gszsq    1/1       Running   0          1m
+red-app-5969d9f7bd-zhmh4    1/1       Running   0          1m
+
+$kubectl exec -ti blue-app-66f8cc9cf9-twhr5  -- touch /tmp/down
+~~~
+
+### Now we have one endpoint in failure state
+If we are fast enought we can reach failure endpoint before it will disable.
+Review health a few times
+~~~
+http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/health Host:blue.example.com
+
+http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/health Host:blue.example.com
+~~~
+
+Failed endpoint will be disabled and we just reach alive endpoint.
+Review text page a few times
+~~~
+http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:blue.example.com
+
+http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:blue.example.com
+~~~
+
+### Now we set failed pod to a 'alive state'
+~~~
+
+kubectl get pods 
+
+kubectl exec -ti <FAILURE_POD_USED_BEFORE>  -- rm /tmp/down
+
+~~~
+
+#### _Sample output_
+~~~
+$kubectl exec -ti blue-app-66f8cc9cf9-twhr5  -- rm /tmp/down
+~~~
+Now we will review health a few times
+~~~
+http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/health Host:blue.example.com
+
+http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/health Host:blue.example.com
+~~~
+
+And failed endpoint will be alive again and will be added to the upstream.
+
+Review text page a few times
+~~~
+http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:blue.example.com
+
+http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:blue.example.com
+~~~
+
 
 
 
