@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: red
-        image: codegazers/colors:1.4
+        image: codegazers/colors:1.5
         ports:
         - containerPort: 3000
         env:
@@ -62,7 +62,7 @@ spec:
     spec:
       containers:
       - name: blue
-        image: codegazers/colors:1.4
+        image: codegazers/colors:1.5
         ports:
         - containerPort: 3000
         env:

@@ -54,14 +54,23 @@ http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:blue.example.com
 ab -n 10000 -v 2 -k  -H "host: red.example.com" ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text
 ~~~
 
-### We will deploy now ingress resource with active health checks
+### We will deploy now application with active health checks
+~~~
+curl https://raw.githubusercontent.com/Codegazers/k8s-vagrant/master/examples/colors/colors-with-health.yml | kubectl apply -f -
 
+
+~~~
+### And now we update ingress resource 
+~~~
 kubectl delete ingress colors-ingress
 
 curl https://raw.githubusercontent.com/Codegazers/k8s-vagrant/master/examples/colors/colors-ingress-with-health.yml | kubectl apply -f -
+~~~
 
+
+
+
+## Dashboard will be accesible on http://127.0.0.1:8080/dashboard.html after nginx-ingress pod port forwarding:
 ~~~
-### And now we update application deployments
-~~~
-curl https://raw.githubusercontent.com/Codegazers/k8s-vagrant/master/examples/colors/colors-with-health.yml | kubectl apply -f -
+kubectl port-forward $(kubectl get pods -n nginx-ingress -o name) 8080:8080 --namespace=nginx-ingress
 ~~~
