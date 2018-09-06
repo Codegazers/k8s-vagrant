@@ -1,7 +1,7 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: colors-ingress
+  name: red-ingress
 spec:
   rules:
   - host: red.example.com
