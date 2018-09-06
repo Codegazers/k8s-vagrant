@@ -1,7 +1,7 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: nginx-ingress-controller
+  name: colors-ingress
   annotations:
     nginx.org/rewrites: "serviceName=red-svc rewrite=/;"
 spec:
