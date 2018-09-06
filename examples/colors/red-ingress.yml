@@ -1,0 +1,12 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: colors-ingress
+spec:
+  rules:
+  - host: red.example.com
+    http:
+      paths:
+      - backend:
+          serviceName: red-svc
+          servicePort: 80
