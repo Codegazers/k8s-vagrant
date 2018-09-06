@@ -54,12 +54,16 @@ http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:blue.example.com
 ab -n 10000 -v 2 -k  -H "host: red.example.com" ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text
 ~~~
 
+## Ingress Controller with HealthChecks
+
 ### We will deploy now application with active health checks
 ~~~
 curl https://raw.githubusercontent.com/Codegazers/k8s-vagrant/master/examples/colors/colors-with-health.yml | kubectl apply -f -
 
 
 ~~~
+
+
 ### And now we update ingress resource 
 ~~~
 kubectl delete ingress colors-ingress
@@ -169,6 +173,19 @@ http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:blue.example.com
 http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:blue.example.com
 ~~~
 
+
+## Ingress Controller rewriting 
+### Update ingress resource 
+~~~
+kubectl delete ingress colors-ingress
+
+curl https://raw.githubusercontent.com/Codegazers/k8s-vagrant/master/examples/colors/colors-ingress-rewrite.yml | kubectl apply -f -
+~~~
+### We can just test rewrite easily using /red/ path on blue deployment:
+~~~
+http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/red/text Host:blue.example.com
+~~~
+Results will show a red application container
 
 
 

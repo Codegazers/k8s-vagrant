@@ -1,7 +1,7 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: nginx-ingress-controller-sticky
+  name: colors-ingress
   annotations:
     nginx.com/sticky-cookie-services: "serviceName=red-svc srv_id expires=10s path=/text;"
 spec:
