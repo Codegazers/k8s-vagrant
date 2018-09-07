@@ -1,0 +1,51 @@
+
+## NGINX Ingress Controller Simple Demo Guide
+
+asciinema rec -t "NGINX Ingress Controller Simple Demo"
+
+# We deploy complete NGINX Plus Ingress Controller with a full deployment file
+
+curl https://raw.githubusercontent.com/Codegazers/k8s-vagrant/master/demo/nginx-plus-ingress_full-deployment.yml | kubectl apply -f -
+
+
+# We have created 'nginx-ingress' namespace so we will wait until all components are ready.
+
+kubectl get all --namespace nginx-ingress
+
+
+# We deploy now two deployments with their services (red-app and blue-app with red-svc and blue-svc)
+
+curl https://raw.githubusercontent.com/Codegazers/k8s-vagrant/master/examples/colors/colors.yml | kubectl create -f -
+
+
+# For quick access we prepare some environment variables
+
+export INGRESS_IP=$(minikube   service -n nginx-ingress nginx-ingress --url --format "{{ .IP }}" | head -1)
+export INGRESS_HTTP_PORT=$(minikube   service -n nginx-ingress nginx-ingress --url --format "{{ .Port }}" | head -1)
+export INGRESS_HTTPS_PORT=$(minikube   service -n nginx-ingress nginx-ingress --url --format "{{ .Port }}" | tail -1)
+
+# We review the deployments
+
+kubectl get all --namespace default
+
+kubectl get pods --namespace default
+
+
+# Now we deploy colors-ingress ingress resource for accesing both applications
+
+curl https://raw.githubusercontent.com/Codegazers/k8s-vagrant/master/examples/colors/colors-ingress.yml | kubectl create -f -
+
+
+# We can now review ingress resource
+
+kubectl get ingress colors-ingress -o yaml
+
+
+# And now we can access our applications setting host headers
+
+http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:red.example.com
+
+http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:blue.example.com
+
+
+kubectl get pods --namespace default
