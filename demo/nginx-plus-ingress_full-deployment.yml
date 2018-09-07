@@ -26,6 +26,8 @@ metadata:
   name: nginx-config
   namespace: nginx-ingress
 data:
+  server-names-hash-bucket-size: "64" # default value depends on the size of the processor’s cache line. See http://nginx.org/en/docs/http/ngx_http_core_module.html#server_names_hash_bucket_size
+  server-names-hash-max-size: "1024" # default is "512". See http://nginx.org/en/docs/http/ngx_http_core_module.html#server_names_hash_max_size
 
 ---
 kind: ClusterRole
