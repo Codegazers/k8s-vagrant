@@ -6,7 +6,7 @@
 curl https://raw.githubusercontent.com/Codegazers/k8s-vagrant/master/demo/nginx-plus-ingress_full-deployment.yml | kubectl apply -f -
 ~~~
 
-### We have created 'nginx-ingress' namespace so we will wait until all Kong components are ready.
+### We have created 'nginx-ingress' namespace so we will wait until all components are ready.
 ~~~
 kubectl get all --namespace nginx-ingress
 ~~~
