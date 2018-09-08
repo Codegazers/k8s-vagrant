@@ -1,7 +1,7 @@
 
-## NGINX Ingress Controller Simple Demo Guide
+## DEMO_NGINX_Ingress_Controller_Session_Persistence
 
-asciinema rec -t "NGINX Ingress Controller Simple Demo"
+asciinema rec -t "DEMO_NGINX_Ingress_Controller_Session_Persistence"
 
 # We deploy complete NGINX Plus Ingress Controller with a full deployment file
 
@@ -13,10 +13,9 @@ curl https://raw.githubusercontent.com/Codegazers/k8s-vagrant/master/demo/nginx-
 kubectl get all --namespace nginx-ingress
 
 
-# We deploy now two deployments with their services (red-app and blue-app with red-svc and blue-svc)
+# We will deploy now applications with 2 pods for blue and 3 for red
 
-curl https://raw.githubusercontent.com/Codegazers/k8s-vagrant/master/examples/colors/colors.yml | kubectl apply -f -
-
+curl https://raw.githubusercontent.com/Codegazers/k8s-vagrant/master/examples/colors/colors-with-health.yml | kubectl apply -f - 
 
 # For quick access we prepare some environment variables
 
@@ -33,10 +32,12 @@ kubectl get pods --namespace default
 
 # Now we deploy colors-ingress ingress resource for accesing both applications
 
-curl https://raw.githubusercontent.com/Codegazers/k8s-vagrant/master/examples/colors/colors-ingress.yml | kubectl create -f -
+curl https://raw.githubusercontent.com/Codegazers/k8s-vagrant/master/examples/colors/colors-ingress-sticky.yml | kubectl apply -f -
 
 
-# We can now review ingress resource
+# We have setup this resource with session persistence
+# Sticky Sessions for backends
+# Review ingress resource
 
 kubectl get ingress colors-ingress -o yaml
 
@@ -47,5 +48,24 @@ http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:red.example.com
 
 http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:blue.example.com
 
-
 kubectl get pods --namespace default
+
+
+# We will ask just for red host header to reach red backends:
+
+http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/health Host:red.example.com
+
+http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/health Host:red.example.com
+
+http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/health Host:red.example.com
+
+
+# As we have seen, no persistence has been made because we haven't set any session
+
+# Now we will use same session for each request to reach always the same backend
+ 
+http --session red ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:red.example.com
+
+http --session red ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:red.example.com
+
+
