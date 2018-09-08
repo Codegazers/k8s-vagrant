@@ -36,7 +36,7 @@ export HTTPS_PORT=$(minikube service -n kong kong-proxy --url --format "{{ .Port
 
 ### Now we deploy colors-ingress ingress resource for accesing both applications
 ~~~
-curl https://raw.githubusercontent.com/Codegazers/k8s-vagrant/master/examples/colors/colors-ingress.yml | kubectl create -f -
+curl https://raw.githubusercontent.com/Codegazers/k8s-vagrant/master/examples/colors/colors-ingress.yml | kubectl apply -f -
 ~~~
 
 ### We just set up host routing

@@ -63,7 +63,14 @@ kubectl get pods -l app=blue
 
 # And create /tmp/down on latest pod ...
 
-kubectl exec -ti $(kubectl get pods -o name -l app=blue|tail -1|cut -d "/" -f2) -- touch /tmp/down
+# We get latest pod
+latest_blue_pod=$(kubectl get pods -o name -l app=blue|tail -1|cut -d "/" -f2)
+
+# or
+latest_blue_pod=$(kubectl get pods --selector=app=blue -o  jsonpath='{.items[:1].metadata.name}')
+ 
+
+kubectl exec -ti ${latest_blue_pod} -- touch /tmp/down
 
 
 # And now we can review status again 
@@ -93,7 +100,7 @@ http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:blue.example.com
 
 # Now we set "alive" our "failed" backend
 
-kubectl exec -ti $(kubectl get pods -o name -l app=blue|tail -1|cut -d "/" -f2) -- rm /tmp/down
+kubectl exec -ti ${latest_blue_pod} -- rm /tmp/down
 
 
 # After some seconds, all backends will be available again

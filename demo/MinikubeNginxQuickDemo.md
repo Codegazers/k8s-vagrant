@@ -206,15 +206,15 @@ http --session red ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:red.example.com
 ~~~
 Results will show same red application pod everytime we use same session.
 
-## __NOTE:__
-We can use curl too passing Cookie session id
+## __NOTES:__
+
+### We can use curl too passing Cookie session id
 ~~~
 curl -vvv --resolve red.example.com:${INGRESS_HTTP_PORT}:${INGRESS_IP}-b "red_svc_id=<red_svc_id VALUE>" http://red.example.com:${INGRESS_HTTP_PORT}/text
 ~~~
 
-
-~~~
 -------
+
 
 ### Dashboard will be accesible on http://127.0.0.1:8080/dashboard.html after nginx-ingress pod port forwarding:
 ~~~
