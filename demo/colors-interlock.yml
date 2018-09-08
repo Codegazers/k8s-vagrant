@@ -7,7 +7,7 @@ services:
     environment:
       - COLOR=red
     deploy:
-     replicas: 1
+     replicas: 3
      labels:
         com.docker.lb.hosts: red.example.com
         com.docker.lb.network: colors
@@ -21,7 +21,7 @@ services:
     environment:
       - COLOR=blue
     deploy:
-     replicas: 1
+     replicas: 3
      labels:
         com.docker.lb.hosts: blue.example.com
         com.docker.lb.network: colors
