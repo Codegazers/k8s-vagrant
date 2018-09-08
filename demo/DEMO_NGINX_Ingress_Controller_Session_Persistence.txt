@@ -69,3 +69,8 @@ http --session red ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:red.example.com
 http --session red ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:red.example.com
 
 
+
+
+## Asciinema recorded
+
+https://asciinema.org/a/lGHTS2dyIxHORWOLt90LRzN3b
