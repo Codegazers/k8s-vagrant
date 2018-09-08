@@ -4,6 +4,7 @@ metadata:
   name: colors-ingress
   annotations:
     nginx.com/sticky-cookie-services: "serviceName=red-svc red_svc_id expires=60s path=/;"
+    nginx.org/rewrites: "serviceName=red-svc rewrite=/;"
 spec:
   rules:
   - host: blue.example.com
