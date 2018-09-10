@@ -1,7 +1,7 @@
 
-## DEMO_EVENT_DockerMeetup
+## DEMO_EVENT_DockerMeetup_NGINX
 
-asciinema rec -t "DEMO_EVENT_DockerMeetup"
+asciinema rec -t "DEMO_EVENT_DockerMeetup_NGINX"
 
 # We deploy complete NGINX Plus Ingress Controller with a full deployment file
 
@@ -15,7 +15,7 @@ kubectl get all --namespace nginx-ingress
 
 # We will deploy now applications with 2 pods for blue and 3 for red
 
-curl https://raw.githubusercontent.com/Codegazers/k8s-vagrant/master/examples/colors/colors-with-health.yml | kubectl apply -f - 
+curl https://raw.githubusercontent.com/Codegazers/k8s-vagrant/master/demo/colors-with-health.yml | kubectl apply -f - 
 
 # For quick access we prepare some environment variables
 
@@ -32,7 +32,7 @@ kubectl get pods --namespace default
 
 # Now we deploy colors-ingress ingress resource for accesing both applications
 
-curl https://raw.githubusercontent.com/Codegazers/k8s-vagrant/master/examples/colors/colors-ingress-fulldemo.yml | kubectl apply -f -
+curl https://raw.githubusercontent.com/Codegazers/k8s-vagrant/master/demo/colors-ingress-fulldemo.yml | kubectl apply -f -
 
 # We can now review ingress resource
 
@@ -70,7 +70,7 @@ http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/health Host:blue.example.com
 
 # For blue app we can use
 
-kubectl get pods -l app=blue
+kubectl get pods --selector=app=blue
 
 # And create /tmp/down on latest pod ...
 
@@ -86,14 +86,12 @@ kubectl exec -ti ${latest_blue_pod} -- touch /tmp/down
 
 http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/health Host:blue.example.com
 
-http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/health Host:blue.example.com
 
 
 # Review again after waiting some seconds and everything is healthy, why?
 
 http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/health Host:blue.example.com
 
-http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/health Host:blue.example.com
 
 
 # Because in fact one of the backends has been disabled by Nginx
@@ -101,9 +99,6 @@ http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/health Host:blue.example.com
 
 http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:blue.example.com
 
-http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:blue.example.com
-
-http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:blue.example.com
 
 
 # Now we set "alive" our "failed" backend
@@ -115,19 +110,10 @@ kubectl exec -ti ${latest_blue_pod} -- rm /tmp/down
 
 http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:blue.example.com
 
-http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:blue.example.com
-
-http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:blue.example.com
-
 
 # ------- PERSISTENCE WITH STICKY SESSIONS ------- #
 
-# Now we deploy colors-ingress ingress resource for accesing both applications
-
-curl https://raw.githubusercontent.com/Codegazers/k8s-vagrant/master/examples/colors/colors-ingress-sticky.yml | kubectl apply -f -
-
-
-# We have setup this resource with session persistence
+# We have setup Ingress Resource with session persistence
 # Sticky Sessions for backends
 # Review ingress resource
 
@@ -147,10 +133,6 @@ kubectl get pods --namespace default
 
 http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/health Host:red.example.com
 
-http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/health Host:red.example.com
-
-http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/health Host:red.example.com
-
 
 # As we have seen, no persistence has been made because we haven't set any session
 
@@ -158,11 +140,7 @@ http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/health Host:red.example.com
  
 http --session red ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:red.example.com
 
-http --session red ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:red.example.com
-
-
 
 
 ## Asciinema recorded
 
-https://asciinema.org/a/lGHTS2dyIxHORWOLt90LRzN3b
