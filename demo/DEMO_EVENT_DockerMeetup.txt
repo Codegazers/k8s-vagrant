@@ -1,0 +1,168 @@
+
+## DEMO_EVENT_DockerMeetup
+
+asciinema rec -t "DEMO_EVENT_DockerMeetup"
+
+# We deploy complete NGINX Plus Ingress Controller with a full deployment file
+
+curl https://raw.githubusercontent.com/Codegazers/k8s-vagrant/master/demo/nginx-plus-ingress_full-deployment.yml | kubectl apply -f -
+
+
+# We have created 'nginx-ingress' namespace so we will wait until all components are ready.
+
+kubectl get all --namespace nginx-ingress
+
+
+# We will deploy now applications with 2 pods for blue and 3 for red
+
+curl https://raw.githubusercontent.com/Codegazers/k8s-vagrant/master/examples/colors/colors-with-health.yml | kubectl apply -f - 
+
+# For quick access we prepare some environment variables
+
+export INGRESS_IP=$(minikube   service -n nginx-ingress nginx-ingress --url --format "{{ .IP }}" | head -1)
+export INGRESS_HTTP_PORT=$(minikube   service -n nginx-ingress nginx-ingress --url --format "{{ .Port }}" | head -1)
+export INGRESS_HTTPS_PORT=$(minikube   service -n nginx-ingress nginx-ingress --url --format "{{ .Port }}" | tail -1)
+
+# We review the deployments
+
+kubectl get all --namespace default
+
+kubectl get pods --namespace default
+
+
+# Now we deploy colors-ingress ingress resource for accesing both applications
+
+curl https://raw.githubusercontent.com/Codegazers/k8s-vagrant/master/examples/colors/colors-ingress-fulldemo.yml | kubectl apply -f -
+
+# We can now review ingress resource
+
+kubectl get ingress colors-ingress -o yaml
+
+
+# ------- DASHBOARD ------- #
+
+### Dashboard will be accesible on http://127.0.0.1:8080/dashboard.html after nginx-ingress pod port forwarding:
+# We enable port forwarding for Dashboard
+
+kubectl port-forward $(kubectl get pods -n nginx-ingress -o name) 8080:8080 --namespace=nginx-ingress
+
+# ------- ACTIVE HEALTH CHECKS ------- #
+
+
+
+# And now we can access our applications setting host headers
+
+http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:red.example.com
+
+http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:blue.example.com
+
+kubectl get pods --namespace default
+
+
+# We can Review their health checks on /health path:
+
+http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/health Host:red.example.com
+
+http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/health Host:blue.example.com
+
+
+# We can set one of them to failure state creating a file named "down" on /tmp
+
+# For blue app we can use
+
+kubectl get pods -l app=blue
+
+# And create /tmp/down on latest pod ...
+
+# We get latest pod
+
+latest_blue_pod=$(kubectl get pods --selector=app=blue -o  jsonpath='{.items[:1].metadata.name}')
+
+kubectl exec -ti ${latest_blue_pod} -- touch /tmp/down
+
+
+# And now we can review status again 
+# (at least a couple of times quickly because latest one it is going to be disabled)
+
+http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/health Host:blue.example.com
+
+http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/health Host:blue.example.com
+
+
+# Review again after waiting some seconds and everything is healthy, why?
+
+http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/health Host:blue.example.com
+
+http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/health Host:blue.example.com
+
+
+# Because in fact one of the backends has been disabled by Nginx
+# And we always reach same backend
+
+http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:blue.example.com
+
+http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:blue.example.com
+
+http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:blue.example.com
+
+
+# Now we set "alive" our "failed" backend
+
+kubectl exec -ti ${latest_blue_pod} -- rm /tmp/down
+
+
+# After some seconds, all backends will be available again
+
+http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:blue.example.com
+
+http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:blue.example.com
+
+http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:blue.example.com
+
+
+# ------- PERSISTENCE WITH STICKY SESSIONS ------- #
+
+# Now we deploy colors-ingress ingress resource for accesing both applications
+
+curl https://raw.githubusercontent.com/Codegazers/k8s-vagrant/master/examples/colors/colors-ingress-sticky.yml | kubectl apply -f -
+
+
+# We have setup this resource with session persistence
+# Sticky Sessions for backends
+# Review ingress resource
+
+kubectl get ingress colors-ingress -o yaml
+
+
+# And now we can access our applications setting host headers
+
+http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:red.example.com
+
+http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:blue.example.com
+
+kubectl get pods --namespace default
+
+
+# We will ask just for red host header to reach red backends:
+
+http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/health Host:red.example.com
+
+http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/health Host:red.example.com
+
+http ${INGRESS_IP}:${INGRESS_HTTP_PORT}/health Host:red.example.com
+
+
+# As we have seen, no persistence has been made because we haven't set any session
+
+# Now we will use same session for each request to reach always the same backend
+ 
+http --session red ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:red.example.com
+
+http --session red ${INGRESS_IP}:${INGRESS_HTTP_PORT}/text Host:red.example.com
+
+
+
+
+## Asciinema recorded
+
+https://asciinema.org/a/lGHTS2dyIxHORWOLt90LRzN3b
