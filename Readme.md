@@ -64,13 +64,15 @@ k8s-3: [tlsbootstrap] Waiting for the kubelet to perform the TLS Bootstrap...
     k8s-3:
     k8s-3: Run 'kubectl get nodes' on the master to see this node join the cluster.
 make[1]: Leaving directory '/home/zero/Labs/k8s-vagrant'
-
+~~~
 
 3. Execute make export 
+~~~
 $ make export
 export KUBECONFIG=_Wherever_you_are_/tmp_deploying_stage/kubeconfig
-
+~~~
 4. Export KUBECONFIG varable and enjoy...
+~~~
 $ export KUBECONFIG=/home/frjaraur/Labs/k8s-vagrant/tmp_deploying_stage/kubeconfig
 
 $ kubectl get nodes
@@ -78,6 +80,6 @@ NAME      STATUS    ROLES     AGE       VERSION
 k8s-1     Ready     master    23m       v1.11.2
 k8s-2     Ready     <none>    19m       v1.11.2
 k8s-3     Ready     <none>    15m       v1.11.2
-
+~~~
 
 
