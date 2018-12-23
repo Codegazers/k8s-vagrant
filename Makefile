@@ -1,3 +1,6 @@
+.EXPORT_ALL_VARIABLES:
+KUBECONFIG = $(CURDIR)/tmp_deploying_stage/kubeconfig
+
 update:
 	@git pull
 destroy:
@@ -6,10 +9,14 @@ destroy:
 
 create:
 	@vagrant up -d
+	@make export
 
 recreate:
 	@make destroy
 	@make create
+
+export:
+	export KUBECONFIG=$(KUBECONFIG)
 
 stop:
 	@VBoxManage controlvm k8s-4 acpipowerbutton 2>/dev/null || true
