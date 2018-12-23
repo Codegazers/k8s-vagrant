@@ -1,5 +1,26 @@
 ## Vagrant Kubernetes Quick Environment (No High Availability)
 
+>NOTE:
+For This to work without using vagrant ssh (using Kubeconfig export environment), be sure to create a virtualbox host-only interface in same segment as K8s nodes defined in config.yml).
+>For example (in my configuration):
+>~~~
+>35: vboxnet1: <BROADCAST,MULTICAST,UP,>LOWER_UP> mtu 1500 qdisc fq_codel state >UP group default qlen 1000
+>    link/ether 0a:00:27:00:00:01 brd ff:ff:ff:ff:ff:ff
+>    inet 10.10.10.10/24 brd 10.10.10.255 scope global vboxnet1
+>       valid_lft forever preferred_lft forever
+>    inet6 fe80::800:27ff:fe00:1/64 scope link 
+>       valid_lft forever preferred_lft forever
+>~~~
+>This allows me define in Vagrantfile:
+>~~~
+>      config.vm.network "private_network",
+>      ip: node['mgmt_ip'],:netmask => "255.255.255.0",
+>      virtualbox__intnet: false,
+>      hostonlyadapter: ["vboxnet1"]
+>~~~
+> Where 'mgmt_ip' will be configured in config.yml 
+
+
 ### Usage
 1. Download Repo
 
