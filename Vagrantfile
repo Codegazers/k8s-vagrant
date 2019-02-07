@@ -2,6 +2,9 @@
 # vi: set ft=ruby :
 #Vagrant::DEFAULT_SERVER_URL.replace('https://vagrantcloud.com')
 # Require YAML module
+
+VAGRANT_ROOT = File.dirname(File.expand_path(__FILE__))
+
 require 'yaml'
 
 config = YAML.load_file(File.join(File.dirname(__FILE__), 'config.yml'))
@@ -23,6 +26,8 @@ calico_url=config['environment']['calico_url']
 boxes = config['boxes']
 
 boxes_hostsfile_entries=""
+
+shared_mount=""
 
  boxes.each do |box|
    boxes_hostsfile_entries=boxes_hostsfile_entries+box['mgmt_ip'] + ' ' +  box['name'] + ' ' + box['name']+'.'+domain+'\n'
@@ -103,9 +108,9 @@ SCRIPT
 $create_kubernetes_cluster = <<SCRIPT
   kubeadm init --pod-network-cidr 10.244.0.0/16 --apiserver-advertise-address $1
   sleep 30
-	mkdir -p ~vagrant/.kube
-	cp -i /etc/kubernetes/admin.conf ~vagrant/.kube/config
-	chown vagrant:vagrant ~vagrant/.kube/config
+  mkdir -p ~vagrant/.kube
+  cp -i /etc/kubernetes/admin.conf ~vagrant/.kube/config
+  chown vagrant:vagrant ~vagrant/.kube/config
   kubeadm token list |awk '/default-node-token/ { print $1 }'> /tmp_deploying_stage/token
   while true;do curl -ksSL https://$1:6443 && break;done
   kubectl --kubeconfig=/home/vagrant/.kube/config  apply -f https://docs.projectcalico.org/v3.1/getting-started/kubernetes/installation/hosted/kubeadm/1.7/calico.yaml
@@ -123,6 +128,15 @@ chmod 700 /tmp/get_helm.sh
 /tmp/get_helm.sh
 SCRIPT
 
+$prepare_disk = <<SCRIPT
+ umount /dev/sdb && true
+ mkdir -p $1
+ mkfs.xfs -f /dev/sdb
+ mount /dev/sdb $1
+ chmod -R 777  $1
+ [ $(grep -c /dev/sdb /etc/fstab) -eq 0 ] && echo "/dev/sdb $1 xfs defaults 0 1" >> /etc/fstab
+SCRIPT
+
 Vagrant.configure(2) do |config|
    #VAGRANT_COMMAND = ARGV[0]
 #   if VAGRANT_COMMAND == "ssh"
@@ -137,9 +151,9 @@ Vagrant.configure(2) do |config|
     config.vm.define node['name'] do |config|
       config.vm.hostname = node['name']
       config.vm.provider "virtualbox" do |v|
-	      v.linked_clone = true
+	v.linked_clone = true
         config.ssh.shell = "bash -c 'BASH_ENV=/etc/profile exec bash'"       
-	      v.customize [ "modifyvm", :id, "--uartmode1", "disconnected" ]
+	v.customize [ "modifyvm", :id, "--uartmode1", "disconnected" ]
         v.name = node['name']
         v.customize ["modifyvm", :id, "--memory", node['mem']]
         v.customize ["modifyvm", :id, "--cpus", node['cpu']]
@@ -153,6 +167,22 @@ Vagrant.configure(2) do |config|
         v.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
         v.customize ["modifyvm", :id, "--nicpromisc4", "allow-all"]
         v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+
+        if node['datafs_mount']
+            data_disk_file = File.join(VAGRANT_ROOT, node['name'] + '-data.vdi')
+            unless File.exist?(data_disk_file)
+                v.customize ['createhd', '--filename', data_disk_file, '--size', 50 * 1024]
+            end
+            v.customize ['storageattach', :id, '--storagectl', 'SATA', '--port', 2, '--device', 0, '--type', 'hdd', '--medium', data_disk_file]
+
+            shared_mount=node['datafs_mount']	
+	    config.vm.provision "shell", path: "./scripts/prepare_disk.sh", args: shared_mount
+      	    #config.vm.provision "shell" do |s|
+     		#s.name       = "Format and mount data disk on "+ shared_mount
+        	#s.inline     = $prepare_disk
+       		#s.args       = shared_mount
+            #end
+        end  
 
         if node['role'] == "client"
           v.gui = true
@@ -240,7 +270,7 @@ Vagrant.configure(2) do |config|
 
       ## INSTALLDOCKER --> on script because we can reprovision
       config.vm.provision "shell" do |s|
-     		s.name       = "Install Docker Engine version "+engine_version
+     	s.name       = "Install Docker Engine version "+engine_version
         s.inline     = $install_docker_engine
        	s.args       = engine_version
       end
