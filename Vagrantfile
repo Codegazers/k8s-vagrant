@@ -175,8 +175,8 @@ Vagrant.configure(2) do |config|
             end
             v.customize ['storageattach', :id, '--storagectl', 'SATA', '--port', 2, '--device', 0, '--type', 'hdd', '--medium', data_disk_file]
 
-            shared_mount=node['datafs_mount']	
-	    config.vm.provision "shell", path: "./scripts/prepare_disk.sh", args: shared_mount
+            #shared_mount=node['datafs_mount']	
+	    #config.vm.provision "shell", path: "./scripts/prepare_disk.sh", args: shared_mount
       	    #config.vm.provision "shell" do |s|
      		#s.name       = "Format and mount data disk on "+ shared_mount
         	#s.inline     = $prepare_disk
